@@ -1,0 +1,12 @@
+diff --git a/model/diffusion/diffusion.py b/model/diffusion/diffusion.py
+index e70c46c..f2ad1aa 100644
+--- a/model/diffusion/diffusion.py
++++ b/model/diffusion/diffusion.py
+@@ -289,7 +289,6 @@ class DiffusionModel(nn.Module):
+                 t=t_b,
+                 cond=cond,
+                 index=index_b,
+-                deterministic=deterministic,
+             )
+             std = torch.exp(0.5 * logvar)
+ 

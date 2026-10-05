@@ -1,0 +1,56 @@
+# Block Pouring world model (DreamerV3 RSSM): front and wrist cameras + end-effector pose,
+# categorical 32x32 latents, PENN ensemble (log-JRD) and logpZO OOD score.
+device: cuda
+seed: 0
+precision: 32
+compile: True
+size: [128, 128]
+num_actions: 7
+
+dyn_hidden: 512
+dyn_deter: 512
+dyn_stoch: 32
+dyn_discrete: 32              # 0 for gaussian latents
+dyn_rec_depth: 1
+dyn_mean_act: none
+dyn_std_act: sigmoid2
+dyn_min_std: 0.1
+initial: learned
+unimix_ratio: 0.01
+units: 512
+act: SiLU
+norm: True
+encoder: {mlp_keys: '^eef_(pos|quat)$', cnn_keys: '.*\_cam$', act: SiLU, norm: True, cnn_depth: 32, kernel_size: 4, minres: 4, mlp_layers: 5, mlp_units: 1024, symlog_inputs: True}
+decoder: {mlp_keys: '^eef_(pos|quat)$', cnn_keys: '.*\_cam$', act: SiLU, norm: True, cnn_depth: 32, kernel_size: 4, minres: 4, mlp_layers: 5, mlp_units: 1024, cnn_sigmoid: False, image_dist: mse, vector_dist: symlog_mse, outscale: 1.0}
+reward_head: {layers: 2, dist: symlog_disc, loss_scale: 1.0, outscale: 0.0}
+cont_head: {layers: 2, loss_scale: 1.0, outscale: 1.0}
+failure_head: {layers: 3, loss_scale: 1.0, outscale: 1.0}
+success_head: {layers: 3, loss_scale: 1.0, outscale: 1.0}
+grad_heads: [decoder, reward, cont, failure, success]
+video_pred_log: True
+video_pred_key: front_cam
+
+dyn_scale: 0.5
+rep_scale: 0.1
+kl_free: 1.0
+model_lr: 1e-4
+opt_eps: 1e-8
+grad_clip: 1000
+weight_decay: 0.0
+opt: adam
+discount: 0.997
+
+use_ensemble: True            # PENN ensemble on (z_t, a_t+1), trained with the world model
+use_density: True             # logpZO on z_t, trained after the world model
+disag_type: ensemble
+disag_models: 5
+disag_target: deter
+disag_offset: 1
+disag_layers: 4
+disag_units: 400
+disag_action_cond: True
+disag_log: True
+
+batch_size: 16
+batch_length: 64
+dataset_dirs: [data/block_pouring/demo, data/block_pouring/rollouts_0804, data/block_pouring/rollouts_0908, data/block_pouring/rollouts_0909]

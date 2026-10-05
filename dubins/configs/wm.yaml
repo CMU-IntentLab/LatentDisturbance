@@ -1,0 +1,54 @@
+# 3D Dubins car world model: image RSSM with gaussian latents and a logpZO OOD score.
+device: cuda
+seed: 0
+precision: 32
+compile: True
+size: [128, 128]
+num_actions: 1
+observe_shift_action: True    # dataset stores (o_t, a_t)
+
+dyn_hidden: 512
+dyn_deter: 512
+dyn_stoch: 32
+dyn_discrete: 0               # 0: gaussian latent, 32: categorical 32x32
+dyn_rec_depth: 1
+dyn_mean_act: none
+dyn_std_act: sigmoid2
+dyn_min_std: 0.1
+initial: learned
+unimix_ratio: 0.01
+units: 512
+act: SiLU
+norm: True
+encoder: {mlp_keys: '$^', cnn_keys: 'image', act: SiLU, norm: True, cnn_depth: 32, kernel_size: 4, minres: 4, mlp_layers: 5, mlp_units: 1024, symlog_inputs: True}
+decoder: {mlp_keys: '$^', cnn_keys: 'image', act: SiLU, norm: True, cnn_depth: 32, kernel_size: 4, minres: 4, mlp_layers: 5, mlp_units: 1024, cnn_sigmoid: False, image_dist: mse, vector_dist: symlog_mse, outscale: 1.0}
+cont_head: {layers: 2, loss_scale: 1.0, outscale: 1.0}
+reward_head: {enabled: False, dist: symlog_disc, layers: 2, loss_scale: 1.0, outscale: 0.0}
+label_heads: [margin]         # P(car inside the obstacle)
+label_head: {layers: 2, units: 512, loss_scale: 1.0, outscale: 1.0}
+grad_heads: [decoder, margin, cont]
+video_pred_log: True
+video_pred_key: image
+
+dyn_scale: 0.5
+rep_scale: 0.1
+kl_free: 1.0
+model_lr: 1e-4
+opt_eps: 1e-8
+grad_clip: 1000
+weight_decay: 0.0
+opt: adam
+discount: 0.997
+
+use_ensemble: False
+use_density: True             # state density logpZO, trained after the world model
+disag_models: 5
+disag_target: deter
+disag_offset: 1
+disag_layers: 4
+disag_units: 400
+disag_action_cond: True
+disag_log: True
+
+batch_size: 16
+batch_length: 32

@@ -1,0 +1,10 @@
+ruamel.yaml
+h5py
+imageio
+imageio-ffmpeg
+einops
+hydra-core==1.3.2
+omegaconf==2.3.0
+wandb
+pretty_errors==1.2.25
+gdown==5.2.0

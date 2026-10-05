@@ -1,0 +1,87 @@
+# Defaults for latentdisturbance.train. Task configs override any key.
+
+task: null                      # package with task.py (load_world_model, make_dataset)
+device: cuda
+seed: 0
+remark: reach
+logdir: logs/reach
+wandb: False
+wandb_project: latentdisturbance
+wm_checkpoint: null
+
+# latent failure margin  l(z) = 1.5 tanh(margin_scale * min_i(thr_i - P_i(failure | z)))
+failure_heads: {}               # {head: threshold}
+margin_scale: 1.0
+
+# UNISafe epistemic-uncertainty margin  r(z, a) = min(l(z), m(z, a))
+epistemic_margin: none          # none | ensemble (log-JRD) | density (logpZO on (z, a))
+epistemic_threshold: 0.0
+epistemic_band: 1.0
+epistemic_shape: clamp          # clamp: clip((thr - u) / band, -1, 1) | step: thr - u within the band, +-1 outside
+epistemic_adaptive: False       # density: per-rollout threshold max(u(z_0, a_0) + alpha, thr)
+epistemic_adaptive_alpha: 0.0
+
+# latent disturbance and uncertainty set
+use_disturbance: True
+disturbance_mode: pessimistic   # pessimistic (min V) | optimistic (max V)
+rollout_mode: pessimistic       # pessimistic | nominal
+kl_radius: 1.0                  # epsilon_KL, mean KL per latent dimension
+kl_overbound_mult: 10.0         # KL multiplier scale outside the ball
+aps_bound: 0.9                  # categorical latents: sample inside the APS set
+use_ood_constraint: True        # in-distribution constraint
+ood_threshold: 100.0            # epsilon_OOD on the logpZO score
+ood_penalty_coeff: 200.0        # lambda_OOD
+disturbance_max_delta: 0.0      # 0: 15 (categorical) / 1 (gaussian)
+disturbance_std_min: 0.1
+disturbance_std_max: null
+disturbance_warmup: 2000
+disturbance_reg_threshold: 2.0
+
+# safety policy and critics
+policy_action_dim: 1
+action_max_scale: 1.0
+action_scale: 1.0               # policy action -> world-model action
+replay_last_action: False       # append the recorded last action dim (gripper)
+replay_action: next             # recorded action replayed from row t: a[t+1] (next) or a[t] (same)
+control_net: [512, 512, 512, 512]
+critic_net: [512, 512, 512, 512]
+critic_action_embed: False
+critic_state_embed_dim: 512
+critic_state_embed_layers: 2
+critic_action_embed_dim: 128
+critic_action_embed_layers: 2
+critic_trunk_dim: 512
+critic_trunk_layers: 2
+actor_lr: 1e-3
+critic_lr: 1e-4
+disturbance_lr: 1e-4
+actor_update_freq: 2
+critic_update_freq: 1
+disturbance_update_freq: 1
+tau: 0.005
+gamma_reachability: 0.95
+gamma_anneal: True              # 0.85 -> 0.9999
+entropy_in_q_target: False
+reachability_batch_size: 512
+memory_capacity: 100000
+
+# imagination
+batch_size: 16                  # B x T start latents
+batch_length: 32
+max_ep_steps: 50
+updates_per_step: 1
+max_updates: 100000
+check_period: 5000
+full_history_starts: True       # transformer RSSM
+encode_chunk: 0
+cont_reset_threshold: 0.0       # >0: restart imaginations whose continuation prob drops below it
+
+# value hinge on known-safe latents (0 = off)
+value_reg_coeff: 0.0
+value_reg_target: 0.1
+value_reg_batch: 1024
+value_reg_imagine_steps: 0
+value_reg_prior_sample: True
+value_reg_post_frac: 0.5
+value_reg_pool: 16384
+value_reg_refresh: 200

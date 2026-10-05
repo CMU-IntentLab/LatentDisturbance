@@ -1,0 +1,9 @@
+# LUCID latent safety filter, 3D Dubins car with positional disturbances (released: 85k updates).
+base: [reach_naughty.yaml]
+remark: dubins_positional
+wm_checkpoint: checkpoints/dubins/wm_positional.pt
+# imagination starts from the naughty dataset
+gt_brt: dubins/brt/disturbance_v1.0_w1.25_d0.3.npy
+rollout_mode: nominal
+kl_radius: 1.5                # calibrated: update from latentdisturbance.calibrate
+ood_threshold: 65.0           # calibrated: update from latentdisturbance.calibrate

@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+checkpoints/
+data/
+logs/
+third_party/
+wandb/

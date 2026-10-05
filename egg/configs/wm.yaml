@@ -1,0 +1,72 @@
+# Egg serving world model: frozen DINOv3 encoder (two cameras) + joint state,
+# transformer RSSM with gaussian latents, falling / flipping failure heads.
+device: cuda
+seed: 0
+precision: 32
+compile: False
+num_workers: 8
+cameras: [rs_0, zed_1]
+size: [192, 256]
+num_actions: 7
+norm_stats: checkpoints/egg/norm_stats.json
+offline_traindir: [data/egg/260709_egg, data/egg/260709_egg_blacktape, data/egg/260709_egg_expert,
+                   data/egg/260710_egg_expert, data/egg/260711_dp_rollout, data/egg/260711_egg_failures, data/egg/260712_egg]
+
+enc_arch: dino
+dyn_arch: transformer
+pixel_recon: True
+dino: {model: dinov3_vits16plus, source: hub, weights_path: checkpoints/egg/dinov3_vits16plus_pretrain_lvd1689m-4057cbaa.pth,
+       repo_dir: '', resize_to: null, train_encoder: False, encoder_lr: 1e-5, unfreeze_blocks: 0, unfreeze_after: 0,
+       pool_dim: 384, pool_heads: 4, pool_queries: 4, fusion: xattn, fusion_depth: 2, fusion_heads: 8, grad_ckpt: True, chunk: 256}
+dino_recon: {enabled: True, loss_scale: 1.0, hidden: 256, layers: 2, target: frozen, target_kind: cls_mean, ema_tau: 0.999}
+transformer: {depth: 4, n_heads: 16, ff_mult: 4, history: 8, windowed: True, dropout: 0.0}
+dyn_hidden: 512
+dyn_deter: 512
+dyn_stoch: 32
+dyn_discrete: 0
+dyn_rec_depth: 1
+dyn_mean_act: none
+dyn_std_act: sigmoid2
+dyn_min_std: 0.1
+initial: learned
+unimix_ratio: 0.01
+units: 512
+act: SiLU
+norm: True
+encoder: {mlp_keys: '^state$', cnn_keys: '.*\_cam$', act: SiLU, norm: True, cnn_depth: 32, kernel_size: 4, minres: 4, mlp_layers: 2, mlp_units: 512, symlog_inputs: True}
+decoder: {mlp_keys: '^state$', cnn_keys: '.*\_cam$', act: SiLU, norm: True, cnn_depth: 32, kernel_size: 4, minres: [3, 4], mlp_layers: 2, mlp_units: 512,
+          cnn_sigmoid: False, image_dist: mse, vector_dist: symlog_mse, outscale: 1.0, arch: conv, patch: {size: 16, dim: 256, depth: 4, heads: 8, ff_mult: 4}}
+reward_head: {enabled: False, layers: 2, dist: symlog_disc, loss_scale: 1.0, outscale: 0.0}
+cont_head: {layers: 2, loss_scale: 1.0, outscale: 1.0}
+label_heads: [fallen, flipped]
+label_head: {layers: 3, units: 512, loss_scale: 1.0, outscale: 1.0}
+grad_heads: [decoder, cont, dino, fallen, flipped]
+video_pred_log: True
+video_pred_key: rs_0_cam
+
+dyn_scale: 0.5
+rep_scale: 0.1
+kl_free: 1.0
+model_lr: 1e-4
+label_lr: 1e-4
+opt_eps: 1e-8
+grad_clip: 1000
+weight_decay: 0.0
+opt: adam
+discount: 0.997
+
+# OOD heads, fit after the world model: logpZO (state), logpZO_za (state-action flow), PENN ensemble (JRD)
+use_density: True
+use_ensemble: True
+use_jrd: True
+disag_type: logpzo
+disag_models: 5
+disag_target: deter
+disag_offset: 1
+disag_layers: 4
+disag_units: 400
+disag_action_cond: True
+disag_log: True
+
+batch_size: 20
+batch_length: 64

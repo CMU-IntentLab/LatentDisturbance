@@ -1,0 +1,42 @@
+# LUCID latent safety filter, naughty 3D Dubins car (released: 90k updates).
+base: [../../latentdisturbance/configs/default.yaml, wm.yaml]
+task: dubins
+remark: dubins_naughty
+logdir: logs/dubins/reach
+wm_checkpoint: checkpoints/dubins/wm_naughty.pt
+dataset_path: data/dubins/naughty_train.hdf5
+gt_brt: dubins/brt/worstcase_v1_w1.25.npy   # zero steering (sign flips) worst case
+
+failure_heads: {margin: 0.7}
+margin_scale: 1.0
+epistemic_margin: none
+
+use_disturbance: True
+disturbance_mode: pessimistic
+rollout_mode: pessimistic
+kl_radius: 1.0                # calibrated: update from latentdisturbance.calibrate
+kl_overbound_mult: 1.0
+use_ood_constraint: True
+ood_threshold: 60.0           # calibrated: update from latentdisturbance.calibrate
+ood_penalty_coeff: 10.0
+disturbance_warmup: 2000
+disturbance_std_max: null
+entropy_in_q_target: True
+
+policy_action_dim: 1
+action_scale: 1.25            # policy action in [-1, 1] -> steering rate
+actor_lr: 1e-3
+critic_lr: 1e-4
+disturbance_lr: 1e-4
+actor_update_freq: 2
+critic_update_freq: 1
+disturbance_update_freq: 1
+gamma_anneal: True
+memory_capacity: 100000
+batch_size: 16
+batch_length: 32
+max_ep_steps: 50
+updates_per_step: 1
+max_updates: 100000
+check_period: 5000
+cont_reset_threshold: 0.9

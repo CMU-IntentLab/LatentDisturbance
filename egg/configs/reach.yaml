@@ -1,0 +1,66 @@
+# LUCID latent safety filter, sunny-side-up egg serving (released: 400k updates).
+base: [../../latentdisturbance/configs/default.yaml, wm.yaml]
+task: egg
+remark: egg
+logdir: logs/egg/reach
+wm_checkpoint: checkpoints/egg/wm.pt
+num_workers: 4
+
+failure_heads: {fallen: 0.7, flipped: 0.7}
+margin_scale: 2.0
+epistemic_margin: density          # state-action flow density logpZO_za
+epistemic_threshold: 450.0
+epistemic_band: 155.5835
+epistemic_shape: clamp
+epistemic_adaptive: True
+epistemic_adaptive_alpha: 0.0
+
+use_disturbance: True
+disturbance_mode: pessimistic
+rollout_mode: pessimistic
+kl_radius: 5.0                # calibrated: update from latentdisturbance.calibrate
+kl_overbound_mult: 10.0
+use_ood_constraint: True
+ood_threshold: 350.0          # calibrated: update from latentdisturbance.calibrate
+ood_penalty_coeff: 100.0
+disturbance_warmup: 10000
+disturbance_std_min: 0.1
+disturbance_std_max: 1.0
+entropy_in_q_target: False
+
+policy_action_dim: 6          # delta pose; the recorded gripper command is replayed
+replay_last_action: True
+replay_action: next
+action_max_scale: 1.0
+actor_lr: 5e-4
+critic_lr: 1e-3
+disturbance_lr: 1e-3
+actor_update_freq: 4
+critic_update_freq: 1
+disturbance_update_freq: 2
+critic_action_embed: True
+gamma_anneal: True
+memory_capacity: 500000
+batch_size: 8
+batch_length: 32
+max_ep_steps: 50
+updates_per_step: 4
+max_updates: 400000
+check_period: 20000
+full_history_starts: True
+encode_chunk: 256
+
+# value hinge V >= 0.3 on successful episodes and the last 8 frames of failure-free episodes
+value_reg_coeff: 1.0
+value_reg_target: 0.3
+value_reg_batch: 1024
+value_reg_imagine_steps: 8
+value_reg_prior_sample: True
+value_reg_post_frac: 0.5
+value_reg_pool: 16384
+value_reg_refresh: 200
+value_reg_batch_length: 64
+value_reg_num_workers: 0
+value_reg_traindir: [data/egg/260729_success]
+value_reg_lastframe_n: 8
+value_reg_lastframe_frac: 0.5
