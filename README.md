@@ -8,6 +8,7 @@
 
 <p align="center">
   <a href="https://junwon.me/LatentDisturbance/"><img src="https://img.shields.io/badge/Project-Page-blue?style=flat-square" alt="Project Page"/></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License"/></a>
 </p>
 
 ---
