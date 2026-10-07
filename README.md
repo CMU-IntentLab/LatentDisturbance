@@ -7,6 +7,7 @@
 > [Junwon Seo](https://junwon.me/), [Andrea Bajcsy](https://www.cs.cmu.edu/~abajcsy/) · Carnegie Mellon University
 
 <p align="center">
+  <a href="https://arxiv.org/abs/2610.07599"><img src="https://img.shields.io/badge/arXiv-2610.07599-b31b1b?style=flat-square" alt="Paper"/></a>
   <a href="https://junwon.me/LatentDisturbance/"><img src="https://img.shields.io/badge/Project-Page-blue?style=flat-square" alt="Project Page"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License"/></a>
 </p>
@@ -120,10 +121,10 @@ hold the values used for the released filters. `--use_disturbance False` trains 
 If this work helps your research, please consider citing:
 
 ```bibtex
-@misc{seo2026latentdisturbance,
+@article{seo2026latentdisturbance,
   title={Modeling Latent Disturbances for Robust Decision-Making in World Models},
   author={Seo, Junwon and Bajcsy, Andrea},
-  year={2026},
-  url={https://junwon.me/LatentDisturbance/}
+  journal={arXiv preprint arXiv:2610.07599},
+  year={2026}
 }
 ```
